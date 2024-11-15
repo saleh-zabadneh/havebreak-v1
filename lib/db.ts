@@ -7,9 +7,19 @@ declare global {
 }
 
 const createPrismaClient = () => {
-  const neon = new Pool({ connectionString: process.env.DATABASE_URL });
-  const adapter = new PrismaNeon(neon);
-  return new PrismaClient({ adapter });
+  const connectionString = process.env.POSTGRES_PRISMA_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const pool = new Pool({ connectionString });
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: connectionString,
+      },
+    },
+  });
 };
 
 export const db = globalThis.prisma || createPrismaClient();
